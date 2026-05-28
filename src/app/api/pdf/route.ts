@@ -1,37 +1,20 @@
 import { NextResponse } from "next/server";
-import puppeteer, { type Browser } from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { ResumeSchema } from "@/lib/schema";
 import { TEMPLATES, type TemplateKey } from "@/lib/templates";
-import { storePreviewData, removePreviewData } from "@/lib/preview-store";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 /**
- * Generates a PDF of the rirekisho by:
- *   1. Encoding the resume + template into the preview URL
- *   2. Loading /preview in headless Chromium
- *   3. Waiting for the client to mark window.__rirekishoReady
- *   4. Printing to PDF at the paper size declared by the template
- *
- * Browser instance is reused across requests for warm starts.
+ * Generates a PDF by:
+ *   1. Launching headless Chromium via @sparticuz/chromium (works on Vercel)
+ *   2. Navigating to /preview?template=...&puppeteer=1
+ *   3. Injecting resume JSON directly via page.evaluate() — avoids the
+ *      in-memory token store which breaks on Vercel (cross-instance state)
+ *   4. Waiting for window.__rirekishoReady, then printing to PDF
  */
-
-declare global {
-  var __pup_browser: Browser | undefined;
-}
-
-async function getBrowser(): Promise<Browser> {
-  if (global.__pup_browser && global.__pup_browser.connected) {
-    return global.__pup_browser;
-  }
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--font-render-hinting=none"],
-  });
-  global.__pup_browser = browser;
-  return browser;
-}
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -52,28 +35,35 @@ export async function POST(req: Request) {
   const meta = TEMPLATES[template];
 
   const json = JSON.stringify(parsed.data);
-  const token = storePreviewData(json);
-
   const origin = originFromRequest(req);
-  const url = `${origin}/preview?template=${template}&token=${token}`;
+  const url = `${origin}/preview?template=${template}&puppeteer=1`;
 
-  const browser = await getBrowser();
+  const executablePath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ?? (await chromium.executablePath());
+
+  const browser = await puppeteer.launch({
+    args: [...chromium.args, "--font-render-hinting=none"],
+    executablePath,
+    headless: true,
+  });
+
   const page = await browser.newPage();
 
   try {
-    // Set viewport to the sheet's pixel size at 96dpi so layout matches print.
     const px = (mm: number) => Math.round((mm / 25.4) * 96);
     await page.setViewport({
       width: px(meta.widthMm),
       height: px(meta.heightMm),
       deviceScaleFactor: 2,
     });
-    await page.goto(url, { waitUntil: "networkidle0", timeout: 30_000 });
-    await page.waitForFunction(
-      "window.__rirekishoReady === true",
-      { timeout: 15_000 },
-    );
-    // Give Noto Sans JP a beat to actually paint after fonts.ready resolves.
+
+    // Load the page shell, then inject data before React hydrates
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await page.evaluate((resumeJson: string) => {
+      (window as unknown as { __puppeteerResumeData: string }).__puppeteerResumeData = resumeJson;
+    }, json);
+
+    await page.waitForFunction("window.__rirekishoReady === true", { timeout: 15_000 });
     await page.evaluateHandle("document.fonts.ready");
 
     const pdf = await page.pdf({
@@ -97,7 +87,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: msg }, { status: 500 });
   } finally {
     await page.close().catch(() => {});
-    removePreviewData(token);
+    await browser.close().catch(() => {});
   }
 }
 

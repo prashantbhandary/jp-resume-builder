@@ -27,8 +27,24 @@ export function PrintPreviewClient() {
 
     const token = params.get("token");
     const encoded = params.get("data");
+    const isPuppeteer = params.get("puppeteer") === "1";
 
-    if (token) {
+    if (isPuppeteer) {
+      // Data is injected by Puppeteer via page.evaluate() after domcontentloaded.
+      // Poll until it appears (usually already set by the time useEffect runs).
+      const interval = setInterval(() => {
+        const injected = (window as unknown as { __puppeteerResumeData?: string }).__puppeteerResumeData;
+        if (injected) {
+          clearInterval(interval);
+          try {
+            setData(JSON.parse(injected) as Resume);
+          } catch {
+            setData(emptyResume());
+          }
+        }
+      }, 20);
+      return () => clearInterval(interval);
+    } else if (token) {
       fetch(`/api/preview-data?token=${encodeURIComponent(token)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((json) => setData(json as Resume))

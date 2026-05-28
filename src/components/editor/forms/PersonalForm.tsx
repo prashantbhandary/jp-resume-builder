@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { Camera, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Camera, Trash2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,12 +19,82 @@ interface Props {
   setData: React.Dispatch<React.SetStateAction<Resume>>;
 }
 
+interface ZipResult {
+  address1: string;
+  address2: string;
+  address3: string;
+  kana1: string;
+  kana2: string;
+  kana3: string;
+}
+
+function katakanaToHiragana(str: string): string {
+  return str.replace(/[ァ-ヶ]/g, (ch) =>
+    String.fromCharCode(ch.charCodeAt(0) - 0x60)
+  );
+}
+
+async function lookupPostalCode(raw: string): Promise<ZipResult | null> {
+  const digits = raw.replace(/[^0-9]/g, "");
+  if (digits.length !== 7) return null;
+  try {
+    const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${digits}`);
+    const json = await res.json();
+    if (json.status === 200 && json.results?.length) return json.results[0] as ZipResult;
+  } catch {
+    // network error — ignore
+  }
+  return null;
+}
+
 export function PersonalForm({ data, setData }: Props) {
   const p = data.personal;
   const fileRef = useRef<HTMLInputElement>(null);
+  const [lookingUpMain, setLookingUpMain] = useState(false);
+  const [lookingUpContact, setLookingUpContact] = useState(false);
 
   function update<K extends keyof Resume["personal"]>(key: K, value: Resume["personal"][K]) {
     setData((prev) => ({ ...prev, personal: { ...prev.personal, [key]: value } }));
+  }
+
+  async function handlePostalCodeChange(raw: string) {
+    update("postalCode", raw);
+    const digits = raw.replace(/[^0-9]/g, "");
+    if (digits.length !== 7) return;
+    setLookingUpMain(true);
+    const result = await lookupPostalCode(raw);
+    setLookingUpMain(false);
+    if (!result) return;
+    const address = result.address1 + result.address2 + result.address3;
+    const furigana = katakanaToHiragana(result.kana1 + result.kana2 + result.kana3).toLowerCase();
+    setData((prev) => ({
+      ...prev,
+      personal: {
+        ...prev.personal,
+        address,
+        furiganaAddress: furigana,
+      },
+    }));
+  }
+
+  async function handleContactPostalCodeChange(raw: string) {
+    update("contactPostalCode", raw);
+    const digits = raw.replace(/[^0-9]/g, "");
+    if (digits.length !== 7) return;
+    setLookingUpContact(true);
+    const result = await lookupPostalCode(raw);
+    setLookingUpContact(false);
+    if (!result) return;
+    const address = result.address1 + result.address2 + result.address3;
+    const furigana = katakanaToHiragana(result.kana1 + result.kana2 + result.kana3).toLowerCase();
+    setData((prev) => ({
+      ...prev,
+      personal: {
+        ...prev.personal,
+        contactAddress: address,
+        furiganaContact: furigana,
+      },
+    }));
   }
 
   function onPhotoChange(file: File) {
@@ -126,11 +196,17 @@ export function PersonalForm({ data, setData }: Props) {
             />
           </Field>
           <Field label="Postal code (〒)" className="sm:col-span-2">
-            <Input
-              value={p.postalCode}
-              onChange={(e) => update("postalCode", e.target.value)}
-              placeholder="102-0072"
-            />
+            <div className="relative">
+              <Input
+                value={p.postalCode}
+                onChange={(e) => handlePostalCodeChange(e.target.value)}
+                placeholder="102-0072"
+                className={lookingUpMain ? "pr-8" : ""}
+              />
+              {lookingUpMain && (
+                <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+            </div>
           </Field>
           <Field label="Address" className="sm:col-span-4">
             <Input
@@ -180,10 +256,17 @@ export function PersonalForm({ data, setData }: Props) {
               />
             </Field>
             <Field label="Postal code (〒)" className="sm:col-span-2">
-              <Input
-                value={p.contactPostalCode}
-                onChange={(e) => update("contactPostalCode", e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  value={p.contactPostalCode}
+                  onChange={(e) => handleContactPostalCodeChange(e.target.value)}
+                  placeholder="102-0072"
+                  className={lookingUpContact ? "pr-8" : ""}
+                />
+                {lookingUpContact && (
+                  <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                )}
+              </div>
             </Field>
             <Field label="Address" className="sm:col-span-4">
               <Input
