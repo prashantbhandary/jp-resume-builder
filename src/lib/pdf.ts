@@ -1,4 +1,45 @@
-import type { TemplateMeta } from "./templates";
+import type { Resume } from "./schema";
+import type { TemplateKey, TemplateMeta } from "./templates";
+import type { SheetStyle } from "./sheet-style";
+
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Server-rendered PDF: POSTs the resume to /api/pdf where headless Chromium
+ * renders the real /preview page (pixel-identical to the editor preview, with
+ * none of the html2canvas text-baseline artifacts) and streams back a PDF that
+ * downloads in-page. Throws on any non-OK response so callers can fall back to
+ * the client-side capture.
+ */
+export async function downloadServerPdf(opts: {
+  resume: Resume;
+  template: TemplateKey;
+  style: SheetStyle;
+  filename: string;
+  blank?: boolean;
+}): Promise<void> {
+  const res = await fetch("/api/pdf", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      resume: opts.resume,
+      template: opts.template,
+      style: opts.style,
+      blank: opts.blank ?? false,
+    }),
+  });
+  if (!res.ok) throw new Error(`PDF service returned ${res.status}`);
+  triggerDownload(await res.blob(), opts.filename);
+}
 
 /**
  * Rasterises an on-screen sheet element to a single-page PDF sized to the
@@ -42,13 +83,5 @@ export async function downloadSheetPdf(
   const imgData = canvas.toDataURL("image/jpeg", 0.97);
   pdf.addImage(imgData, "JPEG", 0, 0, meta.widthMm, meta.heightMm);
 
-  const blob = pdf.output("blob");
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  triggerDownload(pdf.output("blob"), filename);
 }

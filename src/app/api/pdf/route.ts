@@ -34,7 +34,17 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Untrusted request origin" }, { status: 400 });
   }
-  const url = `${origin}/preview?template=${template}&puppeteer=1`;
+  // Carry the chosen font/boldness so the headless render matches the editor
+  // (the preview page has no access to the user's localStorage).
+  const rawStyle = (body as { style?: { font?: string; weight?: string } }).style;
+  const styleQs =
+    rawStyle && typeof rawStyle === "object"
+      ? `&font=${encodeURIComponent(String(rawStyle.font ?? ""))}&weight=${encodeURIComponent(
+          String(rawStyle.weight ?? ""),
+        )}`
+      : "";
+  const blankQs = (body as { blank?: boolean }).blank ? "&blank=1" : "";
+  const url = `${origin}/preview?template=${template}&puppeteer=1${styleQs}${blankQs}`;
 
   // Dynamic imports — avoids webpack converting static imports to require() for ESM-only packages
   const [{ default: puppeteer }, { default: chromium }] = await Promise.all([
@@ -42,14 +52,19 @@ export async function POST(req: Request) {
     import("@sparticuz/chromium-min"),
   ]);
 
+  const localExecutable = process.env.PUPPETEER_EXECUTABLE_PATH;
   const executablePath =
-    process.env.PUPPETEER_EXECUTABLE_PATH ??
+    localExecutable ??
     (await (chromium as { executablePath: (url: string) => Promise<string> }).executablePath(
       CHROMIUM_BINARY_URL,
     ));
 
   const browser = await (puppeteer as { launch: (opts: unknown) => Promise<import("puppeteer-core").Browser> }).launch({
-    args: (chromium as { args: string[] }).args,
+    // A locally-installed Chrome chokes on Sparticuz's serverless args
+    // (e.g. --single-process); use minimal flags for local dev only.
+    args: localExecutable
+      ? ["--no-sandbox", "--disable-setuid-sandbox"]
+      : (chromium as { args: string[] }).args,
     executablePath,
     headless: true,
   });

@@ -10,9 +10,12 @@ import {
   ChevronRight,
   Download,
   Edit3,
+  Eraser,
   FileDown,
+  FileText,
   Home,
   Loader2,
+  MoreVertical,
   Save,
   Type,
   Upload,
@@ -36,7 +39,7 @@ import {
 } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
 import { emptyResume } from "@/lib/schema";
-import { downloadSheetPdf } from "@/lib/pdf";
+import { downloadSheetPdf, downloadServerPdf } from "@/lib/pdf";
 import { Sheet } from "@/components/rirekisho/Sheet";
 import { PersonalForm } from "./forms/PersonalForm";
 import { EducationForm } from "./forms/EducationForm";
@@ -109,57 +112,52 @@ export function EditorClient() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  /**
-   * Opens the standalone /preview page in a new tab with ?print=1 so the
-   * browser's own print engine renders the sheet (pixel-identical to the live
-   * preview) and the user saves it as a PDF. This avoids the html2canvas
-   * rasterisation artifacts (text overlapping cell borders). Returns false if
-   * the popup was blocked, so callers can fall back to the in-page capture.
-   */
-  function openPrintWindow(extra = ""): boolean {
-    // Flush the latest resume so the new tab (same origin) renders current data.
-    saveResume(data);
-    const w = window.open(
-      `/preview?print=1&template=${template}${extra}`,
-      "_blank",
-      "noopener",
-    );
-    return !!w;
-  }
-
   async function downloadPdf() {
-    if (openPrintWindow()) {
-      setDownloaded(true);
-      return;
-    }
-    // Popup blocked — fall back to the in-page raster capture.
     setBusy("pdf");
     try {
-      const el = document.querySelector<HTMLElement>("[data-sheet-capture]");
-      if (!el) throw new Error(t.toasts.sheetNotFound);
-      await downloadSheetPdf(el, TEMPLATES[template], "rirekisho.pdf");
+      // Pixel-perfect server render (real Chromium) — in-page download.
+      await downloadServerPdf({ resume: data, template, style, filename: "rirekisho.pdf" });
       setDownloaded(true);
       toast.success(t.toasts.pdfDownloaded);
-    } catch (e) {
-      console.error(e);
-      toast.error(e instanceof Error ? e.message : t.toasts.pdfFailed);
+    } catch (serverErr) {
+      console.error("server pdf failed, falling back to capture", serverErr);
+      try {
+        const el = document.querySelector<HTMLElement>("[data-sheet-capture]");
+        if (!el) throw new Error(t.toasts.sheetNotFound);
+        await downloadSheetPdf(el, TEMPLATES[template], "rirekisho.pdf");
+        setDownloaded(true);
+        toast.success(t.toasts.pdfDownloaded);
+      } catch (e) {
+        console.error(e);
+        toast.error(e instanceof Error ? e.message : t.toasts.pdfFailed);
+      }
     } finally {
       setBusy(null);
     }
   }
 
   async function downloadTemplate() {
-    if (openPrintWindow("&blank=1")) return;
-    // Popup blocked — fall back to the in-page raster capture.
     setBusy("pdf");
     try {
-      const el = document.querySelector<HTMLElement>("[data-sheet-template-capture]");
-      if (!el) throw new Error(t.toasts.sheetNotFound);
-      await downloadSheetPdf(el, TEMPLATES[template], "rirekisho-blank-template.pdf");
+      await downloadServerPdf({
+        resume: emptyResume(),
+        template,
+        style,
+        filename: "rirekisho-blank-template.pdf",
+        blank: true,
+      });
       toast.success(t.toasts.templateDownloaded);
-    } catch (e) {
-      console.error(e);
-      toast.error(e instanceof Error ? e.message : t.toasts.templateFailed);
+    } catch (serverErr) {
+      console.error("server template failed, falling back to capture", serverErr);
+      try {
+        const el = document.querySelector<HTMLElement>("[data-sheet-template-capture]");
+        if (!el) throw new Error(t.toasts.sheetNotFound);
+        await downloadSheetPdf(el, TEMPLATES[template], "rirekisho-blank-template.pdf");
+        toast.success(t.toasts.templateDownloaded);
+      } catch (e) {
+        console.error(e);
+        toast.error(e instanceof Error ? e.message : t.toasts.templateFailed);
+      }
     } finally {
       setBusy(null);
     }
@@ -202,6 +200,21 @@ export function EditorClient() {
     toast.success(t.toasts.sampleLoaded);
   }
 
+  function clearData() {
+    if (!window.confirm(t.toasts.clearConfirm)) return;
+    const empty = emptyResume();
+    setData(empty);
+    saveResume(empty);
+    toast.success(t.toasts.cleared);
+  }
+
+  function returnHome() {
+    // Returning home after a download starts a fresh resume.
+    const empty = emptyResume();
+    setData(empty);
+    saveResume(empty);
+  }
+
   return (
     <EditorI18nProvider value={{ lang, copy: t }}>
     <div className="min-h-screen flex flex-col bg-zinc-50">
@@ -209,6 +222,7 @@ export function EditorClient() {
       <Header
         onImport={importJson}
         onSample={loadSample}
+        onClear={clearData}
         onTranslate={translateAll}
         busy={busy}
         lang={lang}
@@ -228,6 +242,7 @@ export function EditorClient() {
             onEdit={() => jumpTo("personal")}
             onDownloadPdf={downloadPdf}
             onDownloadTemplate={downloadTemplate}
+            onReturnHome={returnHome}
             busy={busy}
             downloaded={downloaded}
             onResetDownload={() => setDownloaded(false)}
@@ -284,6 +299,7 @@ export function EditorClient() {
 function Header({
   onImport,
   onSample,
+  onClear,
   onTranslate,
   busy,
   lang,
@@ -291,20 +307,22 @@ function Header({
 }: {
   onImport: () => void;
   onSample: () => void;
+  onClear: () => void;
   onTranslate: () => void;
   busy: null | "translate" | "pdf" | "tex";
   lang: Lang;
   onLangChange: (l: Lang) => void;
 }) {
   const { copy } = useEditorI18n();
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-white px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-white px-3 sm:px-4 lg:px-6">
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <Link
           href="/"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground shrink-0"
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
+          <ArrowLeft className="h-4 w-4" />
           <span className="hidden xs:inline">{copy.header.home}</span>
         </Link>
         <span className="text-muted-foreground hidden sm:inline">·</span>
@@ -315,10 +333,19 @@ function Header({
           <Save className="h-3 w-3" /> {copy.header.autosaved}
         </span>
       </div>
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <LangToggle lang={lang} onChange={onLangChange} />
         <Button size="sm" variant="ghost" onClick={onSample} className="hidden sm:flex">
           {copy.header.loadSample}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onClear}
+          className="hidden sm:flex text-muted-foreground hover:text-destructive"
+        >
+          <Eraser className="h-3.5 w-3.5" />
+          <span className="hidden md:inline">{copy.header.clear}</span>
         </Button>
         <Button size="sm" variant="outline" onClick={onImport} className="hidden sm:flex">
           <Upload className="h-3.5 w-3.5" />
@@ -337,6 +364,44 @@ function Header({
           )}
           <span className="hidden sm:inline">{copy.header.translate}</span>
         </Button>
+
+        {/* Mobile overflow menu for the secondary actions hidden above. */}
+        <div className="relative sm:hidden">
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label="More actions"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 top-full mt-1 z-50 w-44 overflow-hidden rounded-lg border bg-white py-1 text-sm shadow-lg">
+                <button
+                  onClick={() => { setMenuOpen(false); onSample(); }}
+                  className="flex w-full items-center gap-2 px-3 py-2.5 hover:bg-zinc-50"
+                >
+                  <FileText className="h-4 w-4 text-muted-foreground" /> {copy.header.loadSample}
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); onImport(); }}
+                  className="flex w-full items-center gap-2 px-3 py-2.5 hover:bg-zinc-50"
+                >
+                  <Upload className="h-4 w-4 text-muted-foreground" /> {copy.header.import}
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); onClear(); }}
+                  className="flex w-full items-center gap-2 px-3 py-2.5 text-destructive hover:bg-red-50"
+                >
+                  <Eraser className="h-4 w-4" /> {copy.header.clear}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
@@ -452,6 +517,7 @@ function PreviewStep({
   onEdit,
   onDownloadPdf,
   onDownloadTemplate,
+  onReturnHome,
   busy,
   downloaded,
   onResetDownload,
@@ -464,6 +530,7 @@ function PreviewStep({
   onEdit: () => void;
   onDownloadPdf: () => void;
   onDownloadTemplate: () => void;
+  onReturnHome: () => void;
   busy: null | "translate" | "pdf" | "tex";
   downloaded: boolean;
   onResetDownload: () => void;
@@ -578,7 +645,7 @@ function PreviewStep({
                     {c.downloadAgain}
                   </Button>
                   <Button asChild className="gap-2 flex-1 sm:flex-none">
-                    <Link href="/">
+                    <Link href="/" onClick={onReturnHome}>
                       <Home className="h-4 w-4" />
                       {c.returnHome}
                     </Link>

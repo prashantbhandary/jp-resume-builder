@@ -9,7 +9,8 @@ import "@/components/rirekisho/sheet.css";
 import { Sheet } from "@/components/rirekisho/Sheet";
 import { sampleResume } from "@/lib/sample";
 import { emptyResume } from "@/lib/schema";
-import { downloadSheetPdf } from "@/lib/pdf";
+import { downloadSheetPdf, downloadServerPdf } from "@/lib/pdf";
+import { DEFAULT_SHEET_STYLE } from "@/lib/sheet-style";
 import { TEMPLATE_LIST, type TemplateKey } from "@/lib/templates";
 import { Button } from "@/components/ui/button";
 import type { Lang, LandingCopy } from "@/lib/i18n";
@@ -58,23 +59,28 @@ export function PreviewMock({
   const [busy, setBusy] = useState(false);
 
   async function handleDownloadBlank() {
-    // Prefer the browser's print engine (pixel-perfect, no raster artifacts);
-    // fall back to the in-page capture if the popup is blocked.
-    const w = window.open(
-      `/preview?print=1&blank=1&template=${active}`,
-      "_blank",
-      "noopener",
-    );
-    if (w) return;
     setBusy(true);
     try {
-      const el = document.querySelector<HTMLElement>("[data-landing-template-capture]");
-      if (!el) throw new Error("Template element not found.");
-      await downloadSheetPdf(el, meta, `rirekisho-${active}-blank.pdf`);
+      // Pixel-perfect server render — downloads in-page.
+      await downloadServerPdf({
+        resume: emptyResume(),
+        template: active,
+        style: DEFAULT_SHEET_STYLE,
+        filename: `rirekisho-${active}-blank.pdf`,
+        blank: true,
+      });
       toast.success(copy.downloadBlank);
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to generate template");
+    } catch (serverErr) {
+      console.error("server template failed, falling back to capture", serverErr);
+      try {
+        const el = document.querySelector<HTMLElement>("[data-landing-template-capture]");
+        if (!el) throw serverErr;
+        await downloadSheetPdf(el, meta, `rirekisho-${active}-blank.pdf`);
+        toast.success(copy.downloadBlank);
+      } catch (e) {
+        console.error(e);
+        toast.error("Failed to generate template");
+      }
     } finally {
       setBusy(false);
     }

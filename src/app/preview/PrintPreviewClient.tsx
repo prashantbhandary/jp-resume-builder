@@ -6,7 +6,15 @@ import { Sheet } from "@/components/rirekisho/Sheet";
 import { emptyResume, type Resume } from "@/lib/schema";
 import { loadResume } from "@/lib/storage";
 import { TEMPLATES, type TemplateKey, loadTemplate } from "@/lib/templates";
-import { loadSheetStyle, type SheetStyle, DEFAULT_SHEET_STYLE } from "@/lib/sheet-style";
+import {
+  loadSheetStyle,
+  FONT_MAP,
+  WEIGHT_MAP,
+  type SheetStyle,
+  type FontKey,
+  type WeightKey,
+  DEFAULT_SHEET_STYLE,
+} from "@/lib/sheet-style";
 import "@/components/rirekisho/sheet.css";
 import "@/components/rirekisho/print.css";
 
@@ -26,7 +34,22 @@ export function PrintPreviewClient() {
   useEffect(() => {
     const t = (params.get("template") as TemplateKey | null) ?? loadTemplate();
     setTemplate(t in TEMPLATES ? t : "jis-a3");
-    setStyle(loadSheetStyle());
+
+    // Prefer style from query (set by the server PDF route, which has no
+    // localStorage); otherwise read the user's saved choice.
+    const fontParam = params.get("font");
+    const weightParam = params.get("weight");
+    if ((fontParam && fontParam in FONT_MAP) || (weightParam && weightParam in WEIGHT_MAP)) {
+      setStyle({
+        font: fontParam && fontParam in FONT_MAP ? (fontParam as FontKey) : DEFAULT_SHEET_STYLE.font,
+        weight:
+          weightParam && weightParam in WEIGHT_MAP
+            ? (weightParam as WeightKey)
+            : DEFAULT_SHEET_STYLE.weight,
+      });
+    } else {
+      setStyle(loadSheetStyle());
+    }
 
     const token = params.get("token");
     const encoded = params.get("data");

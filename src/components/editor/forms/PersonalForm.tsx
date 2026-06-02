@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, Trash2, Loader2 } from "lucide-react";
+import { Camera, Trash2, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,9 @@ interface ZipResult {
 }
 
 function katakanaToHiragana(str: string): string {
-  return str.replace(/[ァ-ヶ]/g, (ch) =>
+  // NFKC folds half-width katakana (ｶﾀｶﾅ) to full-width first, so both forms
+  // from the postal API convert correctly to hiragana.
+  return str.normalize("NFKC").replace(/[ァ-ヶ]/g, (ch) =>
     String.fromCharCode(ch.charCodeAt(0) - 0x60)
   );
 }
@@ -94,48 +96,57 @@ export function PersonalForm({ data, setData }: Props) {
   const [lookingUpMain, setLookingUpMain] = useState(false);
   const [lookingUpContact, setLookingUpContact] = useState(false);
 
+  const typingTimers = useRef<number[]>([]);
+
   function update<K extends keyof Resume["personal"]>(key: K, value: Resume["personal"][K]) {
     setData((prev) => ({ ...prev, personal: { ...prev.personal, [key]: value } }));
   }
 
-  async function handlePostalCodeChange(raw: string) {
-    update("postalCode", raw);
-    const digits = raw.replace(/[^0-9]/g, "");
-    if (digits.length !== 7) return;
-    setLookingUpMain(true);
-    const result = await lookupPostalCode(raw);
-    setLookingUpMain(false);
-    if (!result) return;
-    const address = result.address1 + result.address2 + result.address3;
-    const furigana = katakanaToHiragana(result.kana1 + result.kana2 + result.kana3).toLowerCase();
-    setData((prev) => ({
-      ...prev,
-      personal: {
-        ...prev.personal,
-        address,
-        furiganaAddress: furigana,
-      },
-    }));
+  /** Reveal `text` into a field one character at a time (search → type effect). */
+  function typeInto(key: keyof Resume["personal"], text: string) {
+    typingTimers.current.forEach(clearTimeout);
+    typingTimers.current = [];
+    update(key, "" as Resume["personal"][typeof key]);
+    for (let i = 1; i <= text.length; i++) {
+      const id = window.setTimeout(() => {
+        update(key, text.slice(0, i) as Resume["personal"][typeof key]);
+      }, i * 22);
+      typingTimers.current.push(id);
+    }
   }
 
-  async function handleContactPostalCodeChange(raw: string) {
-    update("contactPostalCode", raw);
-    const digits = raw.replace(/[^0-9]/g, "");
-    if (digits.length !== 7) return;
-    setLookingUpContact(true);
-    const result = await lookupPostalCode(raw);
-    setLookingUpContact(false);
-    if (!result) return;
+  /** Look up a postal code and type the resulting address into the form. */
+  async function runLookup(scope: "main" | "contact", codeOverride?: string) {
+    // codeOverride avoids the stale-closure value when called from onChange.
+    const code = codeOverride ?? (scope === "main" ? p.postalCode : p.contactPostalCode);
+    if (code.replace(/[^0-9]/g, "").length !== 7) return;
+    const setBusy = scope === "main" ? setLookingUpMain : setLookingUpContact;
+    setBusy(true);
+    const result = await lookupPostalCode(code);
+    setBusy(false);
+    if (!result) {
+      toast.error(scope === "main" ? "Postal code not found" : "Postal code not found");
+      return;
+    }
     const address = result.address1 + result.address2 + result.address3;
     const furigana = katakanaToHiragana(result.kana1 + result.kana2 + result.kana3).toLowerCase();
-    setData((prev) => ({
-      ...prev,
-      personal: {
-        ...prev.personal,
-        contactAddress: address,
-        furiganaContact: furigana,
-      },
-    }));
+    if (scope === "main") {
+      update("furiganaAddress", furigana);
+      typeInto("address", address);
+    } else {
+      update("furiganaContact", furigana);
+      typeInto("contactAddress", address);
+    }
+  }
+
+  function handlePostalCodeChange(raw: string) {
+    update("postalCode", raw);
+    if (raw.replace(/[^0-9]/g, "").length === 7) runLookup("main", raw);
+  }
+
+  function handleContactPostalCodeChange(raw: string) {
+    update("contactPostalCode", raw);
+    if (raw.replace(/[^0-9]/g, "").length === 7) runLookup("contact", raw);
   }
 
   async function onPhotoChange(file: File) {
@@ -247,16 +258,29 @@ export function PersonalForm({ data, setData }: Props) {
             />
           </Field>
           <Field label={c.postalCode} className="sm:col-span-2">
-            <div className="relative">
+            <div className="flex gap-1.5">
               <Input
                 value={p.postalCode}
                 onChange={(e) => handlePostalCodeChange(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && runLookup("main")}
                 placeholder="102-0072"
-                className={lookingUpMain ? "pr-8" : ""}
+                inputMode="numeric"
               />
-              {lookingUpMain && (
-                <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Search address"
+                onClick={() => runLookup("main")}
+                disabled={lookingUpMain}
+                className="shrink-0"
+              >
+                {lookingUpMain ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
+              </Button>
             </div>
           </Field>
           <Field label={c.address} className="sm:col-span-4">
@@ -304,16 +328,29 @@ export function PersonalForm({ data, setData }: Props) {
               />
             </Field>
             <Field label={c.postalCode} className="sm:col-span-2">
-              <div className="relative">
+              <div className="flex gap-1.5">
                 <Input
                   value={p.contactPostalCode}
                   onChange={(e) => handleContactPostalCodeChange(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && runLookup("contact")}
                   placeholder="102-0072"
-                  className={lookingUpContact ? "pr-8" : ""}
+                  inputMode="numeric"
                 />
-                {lookingUpContact && (
-                  <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Search address"
+                  onClick={() => runLookup("contact")}
+                  disabled={lookingUpContact}
+                  className="shrink-0"
+                >
+                  {lookingUpContact ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </Field>
             <Field label={c.address} className="sm:col-span-4">

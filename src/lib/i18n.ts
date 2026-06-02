@@ -493,6 +493,7 @@ export interface EditorCopy {
     home: string;
     autosaved: string;
     loadSample: string;
+    clear: string;
     import: string;
     translate: string;
   };
@@ -573,6 +574,8 @@ export interface EditorCopy {
     photoNotImage: string;
     photoTooLarge: string;
     photoReadFailed: string;
+    cleared: string;
+    clearConfirm: string;
   };
 }
 
@@ -582,6 +585,7 @@ export const EDITOR_COPY: Record<Lang, EditorCopy> = {
       home: "Home",
       autosaved: "Autosaved",
       loadSample: "Load sample",
+      clear: "Clear",
       import: "Import",
       translate: "Translate",
     },
@@ -685,6 +689,8 @@ export const EDITOR_COPY: Record<Lang, EditorCopy> = {
       pdfFailed: "Failed to generate PDF",
       templateDownloaded: "Blank template downloaded",
       templateFailed: "Failed to generate template",
+      cleared: "Form cleared",
+      clearConfirm: "Clear all entered data? This cannot be undone.",
       sheetNotFound: "Sheet element not found — open the Preview step first.",
       photoNotImage: "Please choose an image file (JPEG or PNG).",
       photoTooLarge: "Photo is too large — please use an image under 5 MB.",
@@ -696,6 +702,7 @@ export const EDITOR_COPY: Record<Lang, EditorCopy> = {
       home: "ホーム",
       autosaved: "自動保存",
       loadSample: "サンプルを読み込む",
+      clear: "クリア",
       import: "インポート",
       translate: "翻訳",
     },
@@ -797,6 +804,8 @@ export const EDITOR_COPY: Record<Lang, EditorCopy> = {
       pdfFailed: "PDFの生成に失敗しました",
       templateDownloaded: "空欄テンプレートをダウンロードしました",
       templateFailed: "テンプレートの生成に失敗しました",
+      cleared: "フォームをクリアしました",
+      clearConfirm: "入力したデータをすべて消去しますか？元に戻せません。",
       sheetNotFound: "シートが見つかりません — 先にプレビュー画面を開いてください。",
       photoNotImage: "画像ファイル（JPEG／PNG）を選択してください。",
       photoTooLarge: "写真が大きすぎます — 5MB未満の画像を使用してください。",
