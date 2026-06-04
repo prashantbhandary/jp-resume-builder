@@ -6,11 +6,6 @@ import { Camera, Trash2, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-const CountryCombobox = dynamic(
-  () => import("@/components/ui/country-combobox").then((m) => m.CountryCombobox),
-  { ssr: false },
-);
 import {
   Select,
   SelectContent,
@@ -21,6 +16,11 @@ import {
 import type { Resume } from "@/lib/schema";
 import { useEditorI18n } from "@/lib/i18n";
 import { Field, FormSection } from "./Field";
+
+const CountryCombobox = dynamic(
+  () => import("@/components/ui/country-combobox").then((m) => m.CountryCombobox),
+  { ssr: false },
+);
 
 interface Props {
   data: Resume;

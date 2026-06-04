@@ -282,7 +282,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script
           id="adsense-init"
           strategy="lazyOnload"
-          dangerouslySetInnerHTML={{ __html: "(adsbygoogle = window.adsbygoogle || []).push({});" }}
+          dangerouslySetInnerHTML={{ __html: "(window.adsbygoogle = window.adsbygoogle || []).push({});" }}
         />
       </body>
     </html>
