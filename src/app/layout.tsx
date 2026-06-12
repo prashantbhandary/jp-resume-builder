@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "sonner";
-import { FAQ_EN } from "@/lib/faq";
 import { Analytics } from "@vercel/analytics/next";
 import { AdSenseSlot } from "@/components/AdSenseSlot";
 import "./globals.css";
@@ -59,8 +58,9 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    // ≤580px: "Japanese Resume Builder — Free 履歴書 & 職務経歴書" fits comfortably.
-    default: "Japanese Resume Builder — Free 履歴書 & Rirekisho Templates",
+    // Brand-first so Google/AI search associates "ResumeJP" / "resume jp"
+    // with this domain (entity recognition), then the head keywords.
+    default: "ResumeJP — Japanese Resume Builder | Free 履歴書 & Rirekisho",
     template: "%s · ResumeJP",
   },
   // ≤1000px (≈155 chars) — concise and keyword-rich.
@@ -106,80 +106,38 @@ export const metadata: Metadata = {
   },
 };
 
+// Site-wide identity graph only (Organization + WebSite). Page-specific
+// structured data (WebApplication, FAQPage, HowTo) lives in page.tsx so it
+// doesn't duplicate onto every route — Google requires e.g. at most one
+// FAQPage per page.
 function JsonLd() {
   const graph = {
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#org`,
+        name: SITE_NAME,
+        // Entity aliases — how people actually type the brand into search.
+        alternateName: ["resume jp", "resumejp", "resumejp.com", "Resume JP"],
+        url: SITE_URL,
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}/icon-512.png`,
+          width: 512,
+          height: 512,
+        },
+      },
+      {
         "@type": "WebSite",
         "@id": `${SITE_URL}/#website`,
         url: SITE_URL,
         name: SITE_NAME,
+        alternateName: "resumejp.com",
+        publisher: { "@id": `${SITE_URL}/#org` },
         description:
           "Free online builder for authentic Japanese resumes (履歴書 rirekisho) and work-history sheets (職務経歴書).",
         inLanguage: ["en", "ja"],
-      },
-      {
-        "@type": "WebApplication",
-        "@id": `${SITE_URL}/#app`,
-        name: "Japanese Resume Builder",
-        url: SITE_URL,
-        applicationCategory: "BusinessApplication",
-        operatingSystem: "Web",
-        browserRequirements: "Requires a modern web browser",
-        inLanguage: ["en", "ja"],
-        description:
-          "Create JIS, MHLW, mid-career, new-graduate, part-time, dispatch, and English Japanese resume templates and export a print-ready PDF.",
-        featureList: [
-          "JIS standard 履歴書 template",
-          "MHLW (厚生労働省) template",
-          "職務経歴書 work-history formats",
-          "Part-time / arubaito and dispatch layouts",
-          "English résumé / Western CV",
-          "Type in any language with automatic Japanese conversion",
-          "Print-ready PDF download",
-        ],
-        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      },
-      {
-        "@type": "FAQPage",
-        "@id": `${SITE_URL}/#faq`,
-        mainEntity: FAQ_EN.map((f) => ({
-          "@type": "Question",
-          name: f.q,
-          acceptedAnswer: { "@type": "Answer", text: f.a },
-        })),
-      },
-      {
-        "@type": "HowTo",
-        "@id": `${SITE_URL}/#howto`,
-        name: "How to make a Japanese resume (履歴書)",
-        description:
-          "Create a JIS or MHLW Japanese resume (rirekisho) in any language and export a print-ready PDF — for free.",
-        totalTime: "PT5M",
-        estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "0" },
-        step: [
-          {
-            "@type": "HowToStep",
-            name: "Pick a template",
-            text: "Choose the JIS or MHLW rirekisho, or a mid-career, new-grad, part-time, or English CV layout.",
-          },
-          {
-            "@type": "HowToStep",
-            name: "Fill it in any language",
-            text: "Enter your details in English, Nepali, or Japanese using the step-by-step editor with a live preview.",
-          },
-          {
-            "@type": "HowToStep",
-            name: "Convert to natural Japanese",
-            text: "Click translate to rewrite every field into polished business Japanese that employers expect.",
-          },
-          {
-            "@type": "HowToStep",
-            name: "Download a print-ready PDF",
-            text: "Export an A3 or A4 PDF sized exactly to the standard form, ready to email or print.",
-          },
-        ],
       },
     ],
   };

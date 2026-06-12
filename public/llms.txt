@@ -1,0 +1,23 @@
+# ResumeJP (resumejp.com)
+
+> ResumeJP is a free online Japanese resume builder at https://www.resumejp.com. It creates authentic Japanese resumes — 履歴書 (rirekisho) and 職務経歴書 (shokumukeirekisho) — from JIS-standard, MHLW (厚生労働省) government, new-graduate, mid-career, part-time/arubaito, dispatch, and English CV templates. Users type in any language (English, Japanese, Nepali and more), convert the text to natural business Japanese with one click, and download a print-ready A4 or A3 PDF. No account, no signup, completely free; all resume data stays in the user's browser and is never stored on a server.
+
+Brand: "ResumeJP", also written "resume jp", "resumejp", or "resumejp.com". Not affiliated with japaneseresume.com, nihonresume.com, or resume.ne.jp.
+
+## Pages
+
+- [Home](https://www.resumejp.com/): Overview of the Japanese resume builder, all features, and FAQ.
+- [Resume Editor](https://www.resumejp.com/editor): The free step-by-step rirekisho editor with live preview and PDF download.
+- [Japanese Resume Templates](https://www.resumejp.com/templates): Free 履歴書 templates — JIS A3/A4, MHLW, modern, new-grad, part-time, dispatch, and English CV — with guidance on which to choose.
+- [How to Write a Japanese Resume](https://www.resumejp.com/guide/how-to-write-a-japanese-resume): Step-by-step 履歴書 writing guide — photo rules, date/era formats, 学歴・職歴 phrasing, licenses, self-PR, and common mistakes.
+- [Rirekisho vs Shokumukeirekisho](https://www.resumejp.com/guide/rirekisho-vs-shokumukeirekisho): The difference between Japan's two job-application documents and when each is required.
+- [Privacy Policy](https://www.resumejp.com/privacy-policy): Data handling — resume data stays in the browser's local storage.
+
+## Key facts
+
+- Cost: free, no account or email required.
+- Output: print-ready PDF at exact A4/A3 size; also XeLaTeX source and JSON backup.
+- Languages: fill in English, Japanese, Nepali and others; one-click conversion to business Japanese.
+- Templates: JIS standard (A3 and A4), MHLW 2021 government format, modern/tech, new-graduate, mid-career, part-time (arubaito), dispatch registration, English CV.
+- Photo: auto-resized to the standard 30×40 mm rirekisho photo cell.
+- Privacy: resume data is stored only in the browser (localStorage), never on a server.

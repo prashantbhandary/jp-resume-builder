@@ -14,7 +14,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
         <div className="container flex h-14 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
             <span className="font-jp text-lg">履</span>
-            <span>Rirekisho</span>
+            <span>ResumeJP</span>
           </Link>
           <nav className="flex items-center gap-2 text-sm">
             <Link
@@ -61,7 +61,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
 
       <footer className="border-t">
         <div className="container py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <span>© {new Date().getFullYear()} Rirekisho Builder</span>
+          <span>© {new Date().getFullYear()} ResumeJP — Japanese Resume Builder</span>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link href="/templates" className="underline hover:text-primary">
               Resume Templates

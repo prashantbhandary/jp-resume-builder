@@ -91,6 +91,25 @@ const ROLE_LAYOUTS = [
   },
 ];
 
+const TEMPLATE_FAQ: { q: string; a: string }[] = [
+  {
+    q: "Are these Japanese resume templates really free?",
+    a: "Yes — every template on ResumeJP is completely free with no account, no email, and no watermark. You fill it in online and download a print-ready PDF instantly.",
+  },
+  {
+    q: "Can I download a blank rirekisho template to fill in by hand?",
+    a: "Yes. Open any template in the editor and use the blank-template download to get an empty 履歴書 PDF at the correct A4 or A3 size for handwriting.",
+  },
+  {
+    q: "Which Japanese resume template do employers prefer?",
+    a: "Most companies today accept the MHLW (厚生労働省) format, which is the government-recommended standard since 2021. Traditional companies may expect the classic JIS layout; both are available here.",
+  },
+  {
+    q: "Can I switch templates without retyping my information?",
+    a: "Yes. Your data is kept as you switch between JIS, MHLW, modern, new-grad, part-time, and English CV layouts — the sheet reflows automatically.",
+  },
+];
+
 function JsonLd() {
   const graph = {
     "@context": "https://schema.org",
@@ -110,6 +129,14 @@ function JsonLd() {
           position: i + 1,
           name: `${t.name} (${t.jp})`,
           url: `${SITE_URL}/editor`,
+        })),
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: TEMPLATE_FAQ.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
         })),
       },
     ],
@@ -215,6 +242,23 @@ export default function TemplatesPage() {
             </Link>
             , covering the photo rules, date formats, 学歴・職歴 phrasing, and the self-PR section.
           </p>
+        </div>
+
+        <h2 className="mt-12 text-xl sm:text-2xl font-semibold tracking-tight">
+          Template questions
+        </h2>
+        <div className="mt-4 divide-y rounded-2xl border bg-white">
+          {TEMPLATE_FAQ.map((f) => (
+            <details key={f.q} className="group px-4 sm:px-6">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-4 text-sm sm:text-base font-medium tracking-tight">
+                <span>{f.q}</span>
+                <span className="shrink-0 text-lg leading-none text-muted-foreground transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p className="pb-4 -mt-1 text-sm text-muted-foreground leading-relaxed">{f.a}</p>
+            </details>
+          ))}
         </div>
       </article>
     </MarketingShell>
