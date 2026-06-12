@@ -280,13 +280,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <noscript>
           <style dangerouslySetInnerHTML={{ __html: `#rj-splash{display:none}` }} />
         </noscript>
+        {/* kill() injects a permanent display:none rule in addition to removing
+            the node: if a hydration-failure fallback ever re-renders the layout
+            (e.g. a browser extension mutated the DOM before React hydrated),
+            the re-created splash is dead on arrival instead of covering the
+            page forever. Splash runs on the homepage only — other routes kill
+            it immediately. */}
         <script dangerouslySetInnerHTML={{ __html:
-          `(function(){var s=document.getElementById('rj-splash');if(!s)return;` +
+          `(function(){` +
+          `function kill(){var st=document.createElement('style');` +
+          `st.textContent='#rj-splash{display:none!important}';` +
+          `document.head.appendChild(st);` +
+          `var n=document.getElementById('rj-splash');if(n)n.remove();}` +
+          `if(location.pathname!=='/'){kill();return;}` +
+          `var s=document.getElementById('rj-splash');if(!s)return;` +
           `var t0=Date.now(),done=false;` +
           `function hide(){if(done)return;done=true;` +
           `var wait=Math.max(0,650-(Date.now()-t0));` +
           `setTimeout(function(){s.className='rj-hide';` +
-          `setTimeout(function(){s.remove();},450);},wait);}` +
+          `setTimeout(kill,450);},wait);}` +
           `if(document.readyState==='complete'){hide();}` +
           `else{window.addEventListener('load',hide);}` +
           `setTimeout(hide,2500);})()`
