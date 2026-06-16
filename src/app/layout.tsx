@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
-import Script from "next/script";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
-import { AdSenseSlot } from "@/components/AdSenseSlot";
 import "./globals.css";
 
 // Root layout loads ONLY the two fonts needed on every page (landing + public
@@ -265,15 +263,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <Toaster position="bottom-right" />
         <Analytics />
-        {/* AdSense — lazyOnload so it never blocks the critical render path. */}
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6450900255050645"
-          strategy="lazyOnload"
-          crossOrigin="anonymous"
-        />
-        {/* AdSenseSlot renders the <ins> imperatively via useEffect so AdSense's
-            injected iframe never conflicts with React's reconciliation. */}
-        <AdSenseSlot client="ca-pub-6450900255050645" slot="2684471291" />
+        {/* AdSense is intentionally NOT loaded here. The adsbygoogle.js loader
+            and ad slots are mounted per-page via <AdSense /> on content-rich
+            routes only (home, /templates, /guide/*, privacy) — never on the
+            /editor or /preview tools. The google-adsense-account meta tag in
+            <head> keeps site ownership verified across every route. */}
       </body>
     </html>
   );

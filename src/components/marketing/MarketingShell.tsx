@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AdSense } from "@/components/AdSense";
 
 /**
  * Server-rendered shell for SEO/content pages (/templates, /guide/*).
@@ -39,6 +40,11 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="container max-w-3xl px-4 pt-24 pb-12 sm:pt-28 sm:pb-16">{children}</main>
+
+      {/* In-content ad — below the full article, above the CTA. */}
+      <div className="container max-w-3xl px-4 pb-8">
+        <AdSense />
+      </div>
 
       <section className="container max-w-3xl px-4 pb-16 sm:pb-24">
         <div className="rounded-2xl border bg-gradient-to-br from-zinc-50 to-white p-6 sm:p-10 text-center shadow-sm">

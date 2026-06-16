@@ -18,6 +18,7 @@ import { ResumeTypes } from "./ResumeTypes";
 import { HowItWorks } from "./HowItWorks";
 import { FaqSection } from "./FaqSection";
 import { LangToggle } from "@/components/LangToggle";
+import { AdSense } from "@/components/AdSense";
 import { useLang, LANDING_COPY } from "@/lib/i18n";
 
 const ICON_CLASS = "h-4 w-4";
@@ -115,6 +116,12 @@ export function LandingContent() {
       </section>
 
       <FaqSection copy={c.faq} />
+
+      {/* In-content ad — sits between the FAQ and the closing CTA, surrounded
+          by substantial editorial content as AdSense requires. */}
+      <section className="container px-4 pb-4">
+        <AdSense />
+      </section>
 
       {/* CTA strip */}
       <section className="container pb-16 sm:pb-28 px-4">
