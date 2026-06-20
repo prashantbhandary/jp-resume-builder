@@ -44,6 +44,7 @@ function JsonLd() {
         "@id": `${PAGE_URL}#blog`,
         name: "ResumeJP Blog",
         url: PAGE_URL,
+        image: `${PAGE_URL}/opengraph-image`,
         description:
           "Guides to Japanese resumes (履歴書) and part-time (arubaito) job applications for foreigners in Japan.",
         publisher: { "@id": `${SITE_URL}/#org` },
@@ -53,6 +54,7 @@ function JsonLd() {
           headline: p.title,
           description: p.description,
           url: `${SITE_URL}/blog/${p.slug}`,
+          image: `${SITE_URL}/blog/${p.slug}/opengraph-image`,
           datePublished: p.date,
           dateModified: p.date,
           author: { "@type": "Organization", name: "ResumeJP" },

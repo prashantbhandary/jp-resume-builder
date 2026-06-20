@@ -18,6 +18,8 @@ function HomeJsonLd() {
         "@id": `${SITE_URL}/#app`,
         name: "Japanese Resume Builder",
         url: SITE_URL,
+        image: `${SITE_URL}/opengraph-image`,
+        screenshot: `${SITE_URL}/opengraph-image`,
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         browserRequirements: "Requires a modern web browser",

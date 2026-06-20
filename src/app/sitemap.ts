@@ -3,6 +3,9 @@ import { POSTS } from "@/lib/blog";
 
 const SITE_URL = "https://www.resumejp.com";
 
+/** Per-route social/share image — also serves as the image-search asset. */
+const og = (path: string) => `${SITE_URL}${path === "/" ? "" : path}/opengraph-image`;
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
@@ -11,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(p.date),
     changeFrequency: "monthly",
     priority: 0.7,
+    images: [og(`/blog/${p.slug}`)],
   }));
 
   return [
@@ -19,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
+      images: [og("/")],
     },
     {
       url: `${SITE_URL}/editor`,
@@ -31,18 +36,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
+      images: [og("/templates")],
     },
     {
       url: `${SITE_URL}/arubaito-resume`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
+      images: [og("/arubaito-resume")],
     },
     {
       url: `${SITE_URL}/blog`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.7,
+      images: [og("/blog")],
     },
     ...blogPosts,
     {
@@ -50,12 +58,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
+      images: [og("/guide/how-to-write-a-japanese-resume")],
     },
     {
       url: `${SITE_URL}/guide/rirekisho-vs-shokumukeirekisho`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
+      images: [og("/guide/rirekisho-vs-shokumukeirekisho")],
     },
     {
       url: `${SITE_URL}/privacy-policy`,

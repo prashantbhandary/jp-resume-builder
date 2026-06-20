@@ -38,6 +38,7 @@ function JsonLd() {
         description:
           "The difference between the fixed-format 履歴書 and the free-form 職務経歴書, when each is required, and how to write both.",
         url: PAGE_URL,
+        image: `${PAGE_URL}/opengraph-image`,
         author: { "@type": "Organization", name: "ResumeJP" },
         publisher: { "@type": "Organization", name: "ResumeJP" },
         inLanguage: "en",

@@ -131,6 +131,8 @@ function JsonLd() {
         "@type": "SoftwareApplication",
         name: "ResumeJP — Part-Time (Arubaito) Resume Maker",
         url: PAGE_URL,
+        image: `${PAGE_URL}/opengraph-image`,
+        screenshot: `${PAGE_URL}/opengraph-image`,
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         publisher: { "@id": `${SITE_URL}/#org` },

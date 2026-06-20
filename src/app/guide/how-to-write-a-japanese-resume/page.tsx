@@ -40,6 +40,7 @@ function JsonLd() {
         description:
           "Section-by-section instructions for filling out a rirekisho — photo rules, date formats, education and work history phrasing, licenses, and self-PR.",
         url: PAGE_URL,
+        image: `${PAGE_URL}/opengraph-image`,
         author: { "@type": "Organization", name: "ResumeJP" },
         publisher: { "@type": "Organization", name: "ResumeJP" },
         inLanguage: "en",

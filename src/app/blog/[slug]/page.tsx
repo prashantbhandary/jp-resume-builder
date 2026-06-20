@@ -59,6 +59,7 @@ function JsonLd({ slug }: { slug: string }) {
         headline: post.title,
         description: post.description,
         url,
+        image: `${url}/opengraph-image`,
         mainEntityOfPage: url,
         datePublished: post.date,
         dateModified: post.date,
