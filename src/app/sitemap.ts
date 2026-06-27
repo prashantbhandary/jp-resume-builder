@@ -48,6 +48,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [og("/arubaito-resume")],
     },
     {
+      url: `${SITE_URL}/shokumu-keirekisho`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+      images: [og("/shokumu-keirekisho")],
+    },
+    {
+      url: `${SITE_URL}/examples`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+      images: [og("/examples")],
+    },
+    {
       url: `${SITE_URL}/blog`,
       lastModified: now,
       changeFrequency: "weekly",

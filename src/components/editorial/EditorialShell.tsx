@@ -114,6 +114,8 @@ export function EditorialShell({ children }: { children: ReactNode }) {
               { href: "/arubaito-resume", label: "Part-time resume" },
               { href: "/blog", label: "Blog" },
               { href: "/tools", label: "Tools" },
+              { href: "/examples", label: "Examples" },
+              { href: "/shokumu-keirekisho", label: "職務経歴書" },
               { href: "/templates", label: "Templates" },
               { href: "/guide/how-to-write-a-japanese-resume", label: "Writing guide" },
               { href: "/about", label: "About" },

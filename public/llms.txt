@@ -12,6 +12,8 @@ Brand: "ResumeJP", also written "resume jp", "resumejp", or "resumejp.com". Not 
 - [Part-Time (Arubaito) Resume](https://www.resumejp.com/arubaito-resume): Make a part-time/アルバイト rirekisho — residence-status fields, weekly shift-availability grid, Japanese-level field, and ready-to-edit 志望動機 examples by job type (convenience store, restaurant, cafe, factory, hotel, delivery, moving, retail).
 - [Blog](https://www.resumejp.com/blog): Practical, foreigner-aware guides for Japanese resumes and part-time jobs.
 - [Tools](https://www.resumejp.com/tools): Free browser tools — 和暦/西暦 era converter, 満年齢 age calculator, 30×40 mm rirekisho photo cropper, and 自己PR character counter.
+- [Examples](https://www.resumejp.com/examples): 自己PR and 志望動機 example library by situation and profession, with English translations.
+- [職務経歴書 (Work-history sheet)](https://www.resumejp.com/shokumu-keirekisho): The three 職務経歴書 formats, what to write by profession, and how to build one.
 - [How to Write a Japanese Resume](https://www.resumejp.com/guide/how-to-write-a-japanese-resume): Step-by-step 履歴書 writing guide — photo rules, date/era formats, 学歴・職歴 phrasing, licenses, self-PR, and common mistakes.
 - [Rirekisho vs Shokumukeirekisho](https://www.resumejp.com/guide/rirekisho-vs-shokumukeirekisho): The difference between Japan's two job-application documents and when each is required.
 - [The 28-Hour Rule for Students](https://www.resumejp.com/blog/28-hour-rule-students-work-limit): What the student-visa 28-hour weekly work limit (資格外活動許可) means and how to show it on a resume.

@@ -87,6 +87,12 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
             <Link href="/arubaito-resume" className="underline hover:text-primary">
               Part-Time Resume
             </Link>
+            <Link href="/shokumu-keirekisho" className="underline hover:text-primary">
+              職務経歴書
+            </Link>
+            <Link href="/examples" className="underline hover:text-primary">
+              Examples
+            </Link>
             <Link href="/blog" className="underline hover:text-primary">
               Blog
             </Link>
