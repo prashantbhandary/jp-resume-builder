@@ -36,6 +36,12 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
             >
               Blog
             </Link>
+            <Link
+              href="/tools"
+              className="hidden sm:block text-muted-foreground hover:text-foreground px-2"
+            >
+              Tools
+            </Link>
             <Button asChild size="sm">
               <Link href="/editor">
                 Get started <ArrowRight className="h-3.5 w-3.5" />
@@ -83,6 +89,9 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
             </Link>
             <Link href="/blog" className="underline hover:text-primary">
               Blog
+            </Link>
+            <Link href="/tools" className="underline hover:text-primary">
+              Tools
             </Link>
             <Link href="/guide/how-to-write-a-japanese-resume" className="underline hover:text-primary">
               How to Write a 履歴書

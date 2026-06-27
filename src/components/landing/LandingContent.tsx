@@ -72,6 +72,12 @@ export function LandingContent() {
               {lang === "jp" ? "ブログ" : "Blog"}
             </Link>
             <Link
+              href="/tools"
+              className="hidden sm:block text-muted-foreground hover:text-foreground px-2"
+            >
+              {lang === "jp" ? "ツール" : "Tools"}
+            </Link>
+            <Link
               href="/editor"
               className="hidden sm:block text-muted-foreground hover:text-foreground px-2"
             >
@@ -164,6 +170,9 @@ export function LandingContent() {
             </Link>
             <Link href="/blog" className="underline hover:text-primary">
               Blog
+            </Link>
+            <Link href="/tools" className="underline hover:text-primary">
+              Tools
             </Link>
             <Link
               href="/guide/how-to-write-a-japanese-resume"

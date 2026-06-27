@@ -33,6 +33,7 @@ const notoSerifJp = Noto_Serif_JP({
 const NAV = [
   { href: "/arubaito-resume", label: "Part-time" },
   { href: "/blog", label: "Blog" },
+  { href: "/tools", label: "Tools" },
   { href: "/templates", label: "Templates" },
 ];
 
@@ -112,6 +113,7 @@ export function EditorialShell({ children }: { children: ReactNode }) {
             {[
               { href: "/arubaito-resume", label: "Part-time resume" },
               { href: "/blog", label: "Blog" },
+              { href: "/tools", label: "Tools" },
               { href: "/templates", label: "Templates" },
               { href: "/guide/how-to-write-a-japanese-resume", label: "Writing guide" },
               { href: "/about", label: "About" },

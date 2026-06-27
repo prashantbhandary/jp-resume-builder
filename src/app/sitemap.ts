@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { POSTS } from "@/lib/blog";
+import { TOOLS } from "@/lib/tools";
 
 const SITE_URL = "https://www.resumejp.com";
 
@@ -15,6 +16,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
     priority: 0.7,
     images: [og(`/blog/${p.slug}`)],
+  }));
+
+  const toolPages: MetadataRoute.Sitemap = TOOLS.map((t) => ({
+    url: `${SITE_URL}/tools/${t.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.7,
   }));
 
   return [
@@ -47,6 +55,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [og("/blog")],
     },
     ...blogPosts,
+    {
+      url: `${SITE_URL}/tools`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    ...toolPages,
     {
       url: `${SITE_URL}/guide/how-to-write-a-japanese-resume`,
       lastModified: now,
