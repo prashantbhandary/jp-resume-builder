@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLocalResume } from "@/lib/storage";
 import { TEMPLATES, type TemplateKey } from "@/lib/templates";
+import { getCatalogTemplate } from "@/lib/templateCatalog";
 import { useTemplate } from "@/lib/templates-hook";
 import {
   useSheetStyle,
@@ -88,13 +89,29 @@ export function EditorClient() {
   const [stepKey, setStepKey] = useState<StepKey>("template");
   const [busy, setBusy] = useState<null | "translate" | "pdf" | "tex">(null);
   const [downloaded, setDownloaded] = useState(false);
+  // Which catalog preset is selected (the editor renders its base layout).
+  const [catalogSlug, setCatalogSlug] = useState<string | null>(null);
   const t = EDITOR_COPY[lang];
 
-  // Deep-link support: /editor?template=<key> pre-selects a layout (used by the
-  // templates gallery). Runs once on mount; the URL wins over any prior choice.
+  function selectCatalog(slug: string) {
+    const c = getCatalogTemplate(slug);
+    if (!c) return;
+    setCatalogSlug(slug);
+    setTemplate(c.editorKey);
+  }
+
+  // Deep-link support: /editor?template=<slug|key> pre-selects a layout (used by
+  // the templates gallery). Runs once on mount; the URL wins over any prior choice.
   useEffect(() => {
-    const key = new URLSearchParams(window.location.search).get("template");
-    if (key && key in TEMPLATES) setTemplate(key as TemplateKey);
+    const param = new URLSearchParams(window.location.search).get("template");
+    if (!param) return;
+    const c = getCatalogTemplate(param);
+    if (c) {
+      setCatalogSlug(c.slug);
+      setTemplate(c.editorKey);
+    } else if (param in TEMPLATES) {
+      setTemplate(param as TemplateKey);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -293,7 +310,11 @@ export function EditorClient() {
                 transition={{ duration: 0.18 }}
               >
                 {stepKey === "template" && (
-                  <TemplatePicker value={template} onChange={setTemplate} />
+                  <TemplatePicker
+                    selectedSlug={catalogSlug}
+                    baseTemplate={template}
+                    onSelect={selectCatalog}
+                  />
                 )}
                 {stepKey === "personal" && <PersonalForm data={data} setData={setData} />}
                 {stepKey === "education" && <EducationForm data={data} setData={setData} />}
