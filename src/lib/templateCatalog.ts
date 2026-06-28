@@ -201,6 +201,157 @@ export const CATALOG: CatalogTemplate[] = [
     blurb: "A pared-back layout that keeps only the essential fields, clearly laid out.",
     hue: 152,
   },
+
+  // ── Part-time & student ──
+  {
+    slug: "high-school-baito",
+    name: "High-School Student (高校生)",
+    jp: "高校生 バイト 履歴書",
+    category: "Part-time & student",
+    editorKey: "jis-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "First-time high-school part-time applications",
+    blurb:
+      "A simple A4 layout for students with no work history yet — emphasises availability, school, and motivation.",
+    hue: 8,
+  },
+  {
+    slug: "university-baito",
+    name: "University Student (大学生)",
+    jp: "大学生 バイト 履歴書",
+    category: "Part-time & student",
+    editorKey: "jis-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "University students balancing classes and work",
+    blurb:
+      "Highlights class schedule, weekly availability, and any prior baito — built for student applicants.",
+    hue: 54,
+  },
+
+  // ── Standard 履歴書 ──
+  {
+    slug: "job-hunting",
+    name: "Job-Hunting (就活)",
+    jp: "就活 履歴書",
+    category: "Standard 履歴書",
+    editorKey: "jis-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "New-graduate 就活 with self-PR focus",
+    blurb:
+      "The standard 就活 rirekisho with room for self-PR, gakuchika, and motivation — the format most students submit.",
+    hue: 220,
+  },
+  {
+    slug: "no-photo",
+    name: "No-Photo (写真なし)",
+    jp: "写真なし 履歴書",
+    category: "Standard 履歴書",
+    editorKey: "mhlw-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "Online applications that do not require a photo",
+    blurb:
+      "A clean layout without the photo cell, for web applications and companies that ask you to omit it.",
+    hue: 176,
+  },
+
+  // ── Career & professional ──
+  {
+    slug: "sales",
+    name: "Sales (営業)",
+    jp: "営業職 履歴書",
+    category: "Career & professional",
+    editorKey: "mhlw-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "Sales and business-development roles",
+    blurb:
+      "Foregrounds results and a numbers-driven self-PR — pair it with a 職務経歴書 for the full track record.",
+    hue: 268,
+  },
+  {
+    slug: "engineer",
+    name: "Engineer / IT (エンジニア)",
+    jp: "エンジニア 履歴書",
+    category: "Career & professional",
+    editorKey: "modern-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "Software, infrastructure, and IT roles",
+    blurb:
+      "A modern single-column layout with space for a skills stack — suited to tech and 書式自由 companies.",
+    hue: 196,
+  },
+  {
+    slug: "nurse-medical",
+    name: "Nurse / Medical (看護・医療)",
+    jp: "看護師 履歴書",
+    category: "Career & professional",
+    editorKey: "mhlw-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "Nursing, care, and medical roles",
+    blurb:
+      "Leads with licences and qualifications, which matter most in healthcare hiring.",
+    hue: 158,
+  },
+  {
+    slug: "civil-servant",
+    name: "Civil Servant (公務員)",
+    jp: "公務員 履歴書",
+    category: "Career & professional",
+    editorKey: "jis-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "Public-sector and government applications",
+    blurb:
+      "A formal, conservative JIS layout that suits public-sector and 公務員 applications.",
+    hue: 232,
+  },
+  {
+    slug: "second-new-grad",
+    name: "Second New-Grad (第二新卒)",
+    jp: "第二新卒 履歴書",
+    category: "Career & professional",
+    editorKey: "mhlw-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "Early-career switchers within ~3 years of graduating",
+    blurb:
+      "Balances a short work history with strong motivation — made for 第二新卒 applicants.",
+    hue: 284,
+  },
+  {
+    slug: "senior",
+    name: "Senior / Mid-Life (シニア)",
+    jp: "シニア 履歴書",
+    category: "Career & professional",
+    editorKey: "mhlw-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "Experienced and second-career applicants",
+    blurb:
+      "Plenty of room for a long career history and qualifications, for senior and re-employment applications.",
+    hue: 312,
+  },
+
+  // ── Modern & English ──
+  {
+    slug: "creative-design",
+    name: "Creative / Design",
+    jp: "クリエイティブ 履歴書",
+    category: "Modern & English",
+    editorKey: "modern-a4",
+    paper: "A4",
+    orientation: "portrait",
+    bestFor: "Design, web, and creative roles",
+    blurb:
+      "A clean, contemporary layout for creative fields that expect a more designed document.",
+    hue: 134,
+  },
 ];
 
 export const TEMPLATE_CATEGORIES: TemplateCategory[] = [

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Check, Printer } from "lucide-react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { TemplateThumb } from "@/components/templates/TemplateThumb";
+import { BlankPdfButton } from "@/components/templates/BlankPdfButton";
 import {
   CATALOG,
   TEMPLATE_CATEGORIES,
@@ -122,12 +123,7 @@ function TemplateCard({ t, featured = false }: { t: CatalogTemplate; featured?: 
           >
             Use this template <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-          <Link
-            href={`/editor?template=${t.editorKey}`}
-            className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm font-medium hover:bg-secondary"
-          >
-            <Printer className="h-3.5 w-3.5" /> Blank PDF
-          </Link>
+          <BlankPdfButton editorKey={t.editorKey} label="Download blank PDF" />
         </div>
       </div>
     </div>
